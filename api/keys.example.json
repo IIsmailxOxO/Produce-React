@@ -1,0 +1,22 @@
+[
+  {
+    "name": "key-1",
+    "provider": "openrouter",
+    "apiKey": "sk-or-v1-YOUR_KEY_HERE",
+    "model": "openrouter/free",
+    "baseUrl": "https://openrouter.ai/api/v1",
+    "rpmLimit": 20,
+    "dailyLimit": 1000,
+    "enabled": true
+  },
+  {
+    "name": "key-2",
+    "provider": "openrouter",
+    "apiKey": "sk-or-v1-YOUR_KEY_HERE",
+    "model": "openrouter/free",
+    "baseUrl": "https://openrouter.ai/api/v1",
+    "rpmLimit": 20,
+    "dailyLimit": 1000,
+    "enabled": true
+  }
+]
