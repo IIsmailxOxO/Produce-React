@@ -1,0 +1,20 @@
+[
+  {
+    "name": "key-1",
+    "provider": "openrouter",
+    "apiKey": "PASTE_YOUR_FIRST_KEY_HERE",
+    "model": "google/gemma-2-9b-it:free",
+    "rpmLimit": 20,
+    "dailyLimit": 1000,
+    "enabled": true
+  },
+  {
+    "name": "key-2",
+    "provider": "openrouter",
+    "apiKey": "PASTE_YOUR_SECOND_KEY_HERE",
+    "model": "google/gemma-2-9b-it:free",
+    "rpmLimit": 20,
+    "dailyLimit": 1000,
+    "enabled": true
+  }
+]

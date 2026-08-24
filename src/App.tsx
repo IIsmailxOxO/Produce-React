@@ -259,33 +259,66 @@ export default function App() {
     return () => clearInterval(check)
   }, [ws?.videoId])
 
+  // Refresh AI status periodically
+  useEffect(() => {
+    const refresh = () => fetch('/api/ai-status').then(r => r.json()).then(d => setAiStatus(d)).catch(() => {})
+    refresh()
+    const iv = setInterval(refresh, 10000)
+    return () => clearInterval(iv)
+  }, [])
+
   // ─── RENDER: Settings Modal ──
+  const keyStatusEl = aiStatus?.keys?.length > 0 && (
+    <div style={{ marginBottom: 16, padding: 12, background: 'var(--bg-tertiary)', borderRadius: 8 }}>
+      <h4 style={{ fontSize: 13, marginBottom: 8 }}>🔑 Rotating Keys (api/keys.json)</h4>
+      {aiStatus.keys.map((k: any, i: number) => (
+        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', fontSize: 12, borderBottom: '1px solid var(--border)' }}>
+          <span style={{ color: k.onCooldown ? 'var(--warning)' : 'var(--success)' }}>
+            {k.onCooldown ? '⏳' : '✓'} {k.name}
+          </span>
+          <span style={{ color: 'var(--text-muted)' }}>
+            {k.rpmUsed}/{k.rpmLimit || '∞'} rpm
+            {' · '}
+            {k.dailyUsed}/{k.dailyLimit || '∞'} daily
+            {k.cooldownRemaining > 0 && ` · ${k.cooldownRemaining}s cooldown`}
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+
   const settingsModal = showSettings && (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 12, padding: 24, maxWidth: 480, width: '90%' }}>
-        <h3 style={{ marginBottom: 16 }}>⚙️ AI Provider Setup</h3>
+      <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 12, padding: 24, maxWidth: 520, width: '90%', maxHeight: '80vh', overflowY: 'auto' }}>
+        <h3 style={{ marginBottom: 16 }}>⚙️ AI Setup</h3>
+
+        {keyStatusEl}
+
         <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 12 }}>
-          Get a free API key at <a href="https://openrouter.ai/keys" target="_blank" style={{ color: 'var(--accent)' }}>openrouter.ai</a> — free models included, no credit card needed.
+          <b>Best:</b> Edit <code style={{ background: 'var(--bg-tertiary)', padding: '2px 6px', borderRadius: 4 }}>api/keys.json</code> in your project folder — put 2 keys with different accounts and they auto-rotate on rate limits.
         </p>
-        <div style={{ marginBottom: 12 }}>
-          <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Provider</label>
-          <select value={providerType} onChange={e => setProviderType(e.target.value)} style={{ width: '100%', padding: 8, background: 'var(--bg-tertiary)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}>
-            <option value="openrouter">OpenRouter (free models available)</option>
-            <option value="openai">OpenAI</option>
-          </select>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 16 }}>
+          Free keys at <a href="https://openrouter.ai/keys" target="_blank" style={{ color: 'var(--accent)' }}>openrouter.ai/keys</a> — no credit card. Make 2 accounts, put both keys in.
+        </p>
+
+        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12, marginBottom: 12 }}>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>Or add a single key here (fallback if keys.json is empty):</p>
+          <div style={{ marginBottom: 12 }}>
+            <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Provider</label>
+            <select value={providerType} onChange={e => setProviderType(e.target.value)} style={{ width: '100%', padding: 8, background: 'var(--bg-tertiary)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6 }}>
+              <option value="openrouter">OpenRouter</option>
+              <option value="openai">OpenAI</option>
+            </select>
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>API Key</label>
+            <input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} placeholder="sk-or-..." style={{ width: '100%', padding: 8, background: 'var(--bg-tertiary)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
+          </div>
         </div>
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>API Key</label>
-          <input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} placeholder="sk-or-..." style={{ width: '100%', padding: 8, background: 'var(--bg-tertiary)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
-        </div>
-        {providerType === 'openrouter' && !apiKey && (
-          <p style={{ fontSize: 12, color: 'var(--warning)', marginBottom: 12 }}>
-            Without a key, analysis uses rule-based fallback (still useful, but AI adds depth).
-          </p>
-        )}
+
         <div style={{ display: 'flex', gap: 8 }}>
           <button className="btn btn-primary" onClick={saveApiKey}>Save</button>
-          <button className="btn btn-secondary" onClick={() => setShowSettings(false)}>Cancel</button>
+          <button className="btn btn-secondary" onClick={() => setShowSettings(false)}>Close</button>
         </div>
       </div>
     </div>
